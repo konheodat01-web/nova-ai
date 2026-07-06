@@ -1,0 +1,1310 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nova AI – Trợ lý tìm kiếm thông minh</title>
+  <meta name="description" content="Trợ lý AI tìm kiếm thông tin thời gian thực, tổng hợp câu trả lời có trích dẫn nguồn để xác minh tính đúng sai." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    :root {
+      --bg-primary: #0d0d0f;
+      --bg-secondary: #16161a;
+      --bg-tertiary: #1e1e24;
+      --bg-input: #1a1a20;
+      --bg-hover: #22222a;
+      --bg-message-user: #1e3a5f;
+      --bg-message-ai: #16161a;
+      --border: #2a2a35;
+      --border-light: #35353f;
+      --accent: #7c6ff7;
+      --accent-hover: #9b8fff;
+      --accent-glow: rgba(124, 111, 247, 0.15);
+      --text-primary: #e8e8f0;
+      --text-secondary: #9898b0;
+      --text-muted: #5a5a72;
+      --text-accent: #a899ff;
+      --success: #4ade80;
+      --warning: #fbbf24;
+      --error: #f87171;
+      --citation-bg: #1a1a2e;
+      --citation-border: #7c6ff7;
+      --sidebar-width: 260px;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --radius-lg: 16px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --shadow-lg: 0 8px 48px rgba(0,0,0,0.6);
+      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      height: 100dvh;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      flex-shrink: 0;
+      transition: var(--transition);
+    }
+
+    .sidebar-header {
+      padding: 20px 16px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .logo-icon {
+      width: 34px;
+      height: 34px;
+      background: linear-gradient(135deg, #7c6ff7, #a855f7);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      box-shadow: 0 0 16px rgba(124, 111, 247, 0.4);
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #a899ff, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .new-chat-btn {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--accent-glow);
+      border: 1px solid var(--accent);
+      border-radius: var(--radius-sm);
+      color: var(--text-accent);
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+    .new-chat-btn:hover {
+      background: rgba(124,111,247,0.25);
+      box-shadow: 0 0 12px rgba(124,111,247,0.2);
+    }
+
+    .sidebar-section-label {
+      padding: 14px 16px 6px;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+
+    .chat-history {
+      flex: 1;
+      overflow-y: auto;
+      padding: 4px 8px;
+    }
+
+    .chat-history::-webkit-scrollbar { width: 4px; }
+    .chat-history::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+
+    .history-item {
+      padding: 9px 10px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-secondary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      transition: var(--transition);
+    }
+    .history-item:hover { background: var(--bg-hover); color: var(--text-primary); }
+    .history-item.active { background: var(--accent-glow); color: var(--text-accent); }
+
+    .sidebar-footer {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+    }
+
+    .api-key-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .api-key-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .api-key-label .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--error);
+    }
+    .api-key-label .dot.connected { background: var(--success); }
+
+    .api-key-input {
+      width: 100%;
+      padding: 8px 10px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace;
+      outline: none;
+      transition: var(--transition);
+    }
+    .api-key-input:focus { border-color: var(--accent); }
+    .api-key-input::placeholder { color: var(--text-muted); }
+
+    .api-key-save-btn {
+      padding: 7px;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+    .api-key-save-btn:hover { background: var(--accent-hover); }
+
+    /* ── MAIN AREA ── */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    /* ── TOP BAR ── */
+    .topbar {
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-secondary);
+      gap: 12px;
+    }
+    .model-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .model-badge .pulse {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 6px var(--success);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    .search-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 14px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: 20px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+    .search-toggle.active {
+      background: var(--accent-glow);
+      border-color: var(--accent);
+      color: var(--text-accent);
+    }
+    .search-toggle:hover { border-color: var(--accent); }
+
+    /* ── CHAT AREA ── */
+    .chat-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 20px;
+      scroll-behavior: smooth;
+    }
+    .chat-area::-webkit-scrollbar { width: 5px; }
+    .chat-area::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+
+    /* ── WELCOME SCREEN ── */
+    .welcome {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      gap: 20px;
+      text-align: center;
+    }
+    .welcome-icon {
+      width: 72px; height: 72px;
+      background: linear-gradient(135deg, #7c6ff7, #a855f7, #ec4899);
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      box-shadow: 0 0 40px rgba(124,111,247,0.3), 0 0 80px rgba(124,111,247,0.1);
+      animation: float 3s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .welcome h1 {
+      font-size: 28px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #e8e8f0, #a899ff, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .welcome p {
+      font-size: 15px;
+      color: var(--text-secondary);
+      max-width: 500px;
+      line-height: 1.6;
+    }
+    .suggestion-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      max-width: 560px;
+      width: 100%;
+      margin-top: 8px;
+    }
+    .suggestion-card {
+      padding: 14px 16px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      text-align: left;
+      transition: var(--transition);
+    }
+    .suggestion-card:hover {
+      background: var(--bg-hover);
+      border-color: var(--accent);
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+    .suggestion-card .icon { font-size: 20px; margin-bottom: 6px; }
+    .suggestion-card .title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 3px;
+    }
+    .suggestion-card .desc {
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.4;
+    }
+
+    /* ── MESSAGES ── */
+    .messages-container {
+      max-width: 780px;
+      margin: 0 auto;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .message {
+      display: flex;
+      gap: 14px;
+      animation: fadeInUp 0.3s ease;
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .message.user { flex-direction: row-reverse; }
+
+    .avatar {
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+    .avatar.ai {
+      background: linear-gradient(135deg, #7c6ff7, #a855f7);
+      box-shadow: 0 0 12px rgba(124,111,247,0.3);
+    }
+    .avatar.user {
+      background: linear-gradient(135deg, #1e3a5f, #2563eb);
+    }
+
+    .message-content {
+      max-width: 80%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .message.user .message-content { align-items: flex-end; }
+
+    .message-bubble {
+      padding: 14px 18px;
+      border-radius: var(--radius-lg);
+      font-size: 14px;
+      line-height: 1.7;
+      position: relative;
+    }
+    .message.user .message-bubble {
+      background: var(--bg-message-user);
+      border: 1px solid rgba(37, 99, 235, 0.3);
+      border-top-right-radius: 4px;
+      color: var(--text-primary);
+    }
+    .message.ai .message-bubble {
+      background: var(--bg-message-ai);
+      border: 1px solid var(--border);
+      border-top-left-radius: 4px;
+    }
+
+    /* Markdown Styles */
+    .message-bubble p { margin-bottom: 10px; }
+    .message-bubble p:last-child { margin-bottom: 0; }
+    .message-bubble h1, .message-bubble h2, .message-bubble h3 {
+      margin: 14px 0 8px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+    .message-bubble h1 { font-size: 18px; }
+    .message-bubble h2 { font-size: 16px; }
+    .message-bubble h3 { font-size: 14px; }
+    .message-bubble strong { color: #c4b5fd; font-weight: 600; }
+    .message-bubble em { color: var(--text-secondary); font-style: italic; }
+    .message-bubble code {
+      background: #0d0d1a;
+      border: 1px solid var(--border-light);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12.5px;
+      color: #a5b4fc;
+    }
+    .message-bubble pre {
+      background: #0a0a12;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px;
+      overflow-x: auto;
+      margin: 10px 0;
+    }
+    .message-bubble pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      color: #e2e8f0;
+    }
+    .message-bubble ul, .message-bubble ol {
+      padding-left: 20px;
+      margin: 8px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .message-bubble li { line-height: 1.6; }
+    .message-bubble a { color: var(--text-accent); text-decoration: none; }
+    .message-bubble a:hover { text-decoration: underline; }
+    .message-bubble table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13px; }
+    .message-bubble th, .message-bubble td { padding: 8px 12px; border: 1px solid var(--border); }
+    .message-bubble th { background: var(--bg-tertiary); font-weight: 600; }
+    .message-bubble blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 12px;
+      margin: 10px 0;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    /* ── CITATIONS ── */
+    .citations-block {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: var(--citation-bg);
+      border: 1px solid rgba(124, 111, 247, 0.2);
+      border-left: 3px solid var(--citation-border);
+      border-radius: var(--radius-sm);
+    }
+    .citations-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-accent);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .citation-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .citation-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      font-size: 12px;
+    }
+    .citation-num {
+      min-width: 20px;
+      height: 20px;
+      background: rgba(124,111,247,0.2);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-accent);
+      flex-shrink: 0;
+    }
+    .citation-link {
+      color: var(--text-secondary);
+      text-decoration: none;
+      line-height: 1.4;
+      transition: var(--transition);
+      word-break: break-word;
+    }
+    .citation-link:hover { color: var(--text-accent); text-decoration: underline; }
+    .citation-title {
+      font-weight: 500;
+      color: var(--text-primary);
+      display: block;
+      margin-bottom: 1px;
+    }
+    .citation-url { font-size: 11px; color: var(--text-muted); }
+
+    /* ── TYPING INDICATOR ── */
+    .typing-indicator {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 14px 18px;
+    }
+    .typing-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--text-accent);
+      animation: typingBounce 1.2s infinite;
+    }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes typingBounce {
+      0%, 100% { transform: translateY(0); opacity: 0.4; }
+      50% { transform: translateY(-5px); opacity: 1; }
+    }
+
+    /* ── SEARCH INDICATOR ── */
+    .search-indicator {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-accent);
+      padding: 8px 0;
+      animation: fadeInUp 0.2s ease;
+    }
+    .search-spinner {
+      width: 14px; height: 14px;
+      border: 2px solid rgba(124,111,247,0.2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── INPUT AREA ── */
+    .input-area {
+      padding: 16px 20px;
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+    }
+    .input-container {
+      max-width: 780px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .input-wrapper {
+      display: flex;
+      align-items: flex-end;
+      gap: 10px;
+      background: var(--bg-input);
+      border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 12px 14px;
+      transition: var(--transition);
+    }
+    .input-wrapper:focus-within {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    .chat-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      color: var(--text-primary);
+      font-size: 15px;
+      font-family: inherit;
+      line-height: 1.5;
+      resize: none;
+      max-height: 180px;
+      overflow-y: auto;
+      scrollbar-width: none;
+    }
+    .chat-input::-webkit-scrollbar { display: none; }
+    .chat-input::placeholder { color: var(--text-muted); }
+    .send-btn {
+      width: 38px; height: 38px;
+      background: var(--accent);
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+      flex-shrink: 0;
+    }
+    .send-btn:hover:not(:disabled) {
+      background: var(--accent-hover);
+      box-shadow: 0 0 16px rgba(124,111,247,0.4);
+      transform: scale(1.05);
+    }
+    .send-btn:disabled { background: var(--bg-hover); cursor: not-allowed; opacity: 0.5; }
+    .send-btn svg { color: white; }
+
+    .input-footer {
+      text-align: center;
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ── API KEY MODAL ── */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      animation: fadeIn 0.2s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    .modal {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      max-width: 440px;
+      width: 90%;
+      box-shadow: var(--shadow-lg);
+      animation: slideUp 0.3s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .modal h2 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #a899ff, #c084fc);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .modal p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
+    .modal a { color: var(--text-accent); }
+    .modal input {
+      width: 100%;
+      padding: 12px 14px;
+      background: var(--bg-input);
+      border: 1.5px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: 'JetBrains Mono', monospace;
+      outline: none;
+      margin-bottom: 14px;
+      transition: var(--transition);
+    }
+    .modal input:focus { border-color: var(--accent); }
+    .modal-btn {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #7c6ff7, #a855f7);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: white;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      font-family: inherit;
+    }
+    .modal-btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(124,111,247,0.3); }
+    .modal-step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px;
+      background: var(--bg-tertiary);
+      border-radius: var(--radius-sm);
+      margin-bottom: 14px;
+    }
+    .step-num {
+      width: 22px; height: 22px;
+      background: var(--accent);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+      color: white;
+    }
+    .step-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      padding: 12px 18px;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-light);
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      color: var(--text-primary);
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      animation: slideInRight 0.3s ease;
+      z-index: 2000;
+    }
+    .toast.success { border-color: var(--success); }
+    .toast.error { border-color: var(--error); }
+    @keyframes slideInRight {
+      from { transform: translateX(100px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 700px) {
+      .sidebar { display: none; }
+      .suggestion-grid { grid-template-columns: 1fr; }
+      .message-content { max-width: 95%; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">
+      <div class="logo-icon">✦</div>
+      <span class="logo-text">Nova AI</span>
+    </div>
+    <button class="new-chat-btn" onclick="newChat()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Cuộc trò chuyện mới
+    </button>
+  </div>
+  <div class="sidebar-section-label">Lịch sử</div>
+  <div class="chat-history" id="chatHistory">
+    <div style="padding:12px 10px; font-size:12px; color:var(--text-muted); text-align:center">
+      Chưa có cuộc trò chuyện nào
+    </div>
+  </div>
+  <div class="sidebar-footer">
+    <div class="api-key-section">
+      <div class="api-key-label">
+        <div class="dot" id="statusDot"></div>
+        <span id="statusText">Chưa kết nối API</span>
+      </div>
+      <div style="display:flex;gap:6px">
+        <input type="password" class="api-key-input" id="sidebarApiKey"
+               placeholder="AIza..." oninput="previewKey()" />
+        <button class="api-key-save-btn" onclick="saveKeyFromSidebar()">Lưu</button>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="model-badge">
+      <div class="pulse" id="modelPulse"></div>
+      <span id="modelName">Gemini 2.0 Flash</span>
+    </div>
+    <button class="search-toggle active" id="searchToggle" onclick="toggleSearch()">
+      🔍 Tìm kiếm web: <strong>BẬT</strong>
+    </button>
+  </div>
+
+  <!-- CHAT AREA -->
+  <div class="chat-area" id="chatArea">
+    <div class="welcome" id="welcomeScreen">
+      <div class="welcome-icon">✦</div>
+      <h1>Xin chào! Tôi là Nova AI</h1>
+      <p>Trợ lý AI tìm kiếm thông tin thời gian thực.<br/>
+         Mọi câu trả lời đều kèm <strong style="color:var(--text-accent)">trích dẫn nguồn</strong> để bạn tự kiểm tra.</p>
+      <div class="suggestion-grid">
+        <div class="suggestion-card" onclick="sendSuggestion('Tin tức công nghệ AI nổi bật nhất tuần này là gì?')">
+          <div class="icon">🤖</div>
+          <div class="title">Tin tức AI hôm nay</div>
+          <div class="desc">Cập nhật xu hướng AI mới nhất</div>
+        </div>
+        <div class="suggestion-card" onclick="sendSuggestion('Các sản phẩm đang viral trên mạng xã hội Trung Quốc tuần này?')">
+          <div class="icon">🔥</div>
+          <div class="title">Trend mạng xã hội</div>
+          <div class="desc">Sản phẩm đang hot trên TikTok/XHS</div>
+        </div>
+        <div class="suggestion-card" onclick="sendSuggestion('Hướng dẫn chi tiết cách làm MMO với SEO Affiliate năm 2025?')">
+          <div class="icon">💰</div>
+          <div class="title">MMO & SEO Affiliate</div>
+          <div class="desc">Chiến lược kiếm tiền online</div>
+        </div>
+        <div class="suggestion-card" onclick="sendSuggestion('Tổng hợp các công cụ AI miễn phí tốt nhất hiện nay cho content creator?')">
+          <div class="icon">🛠️</div>
+          <div class="title">Công cụ AI miễn phí</div>
+          <div class="desc">Tốt nhất cho content creator</div>
+        </div>
+      </div>
+    </div>
+    <div class="messages-container" id="messagesContainer" style="display:none"></div>
+  </div>
+
+  <!-- INPUT AREA -->
+  <div class="input-area">
+    <div class="input-container">
+      <div class="input-wrapper">
+        <textarea id="chatInput" class="chat-input" rows="1"
+          placeholder="Hỏi bất kỳ điều gì... (Enter để gửi, Shift+Enter xuống dòng)"
+          onkeydown="handleKeyDown(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+      <div class="input-footer">Nova AI có thể mắc sai lầm. Hãy kiểm tra nguồn trích dẫn để xác minh thông tin.</div>
+    </div>
+  </div>
+</main>
+
+<!-- API KEY MODAL -->
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <h2>✦ Chào mừng đến Nova AI</h2>
+    <p>Để sử dụng trợ lý, bạn cần có <strong>Gemini API Key miễn phí</strong> từ Google AI Studio.</p>
+    <div class="modal-step">
+      <div class="step-num">1</div>
+      <div class="step-text">Truy cập <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com/app/apikey</a> và đăng nhập bằng tài khoản Google.</div>
+    </div>
+    <div class="modal-step">
+      <div class="step-num">2</div>
+      <div class="step-text">Nhấn <strong>"Create API key"</strong> → chọn project (hoặc tạo mới) → Copy API key.</div>
+    </div>
+    <div class="modal-step">
+      <div class="step-num">3</div>
+      <div class="step-text">Dán key vào ô bên dưới. Key được lưu trong trình duyệt của bạn, không gửi đi đâu ngoài Google.</div>
+    </div>
+    <input type="password" id="modalApiKey" placeholder="Dán API Key vào đây... (AIzaSy...)" />
+    <button class="modal-btn" onclick="saveKeyFromModal()">🚀 Bắt đầu sử dụng</button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let apiKey = '';
+let useSearch = true;
+let isLoading = false;
+let conversationHistory = [];
+let chatSessions = [];
+let currentSessionId = null;
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  apiKey = localStorage.getItem('nova_api_key') || '';
+  chatSessions = JSON.parse(localStorage.getItem('nova_sessions') || '[]');
+  
+  if (apiKey) {
+    closeModal();
+    updateStatus(true);
+    document.getElementById('sidebarApiKey').value = apiKey;
+    document.getElementById('sendBtn').disabled = false;
+    renderHistorySidebar();
+  }
+
+  // Configure marked
+  marked.setOptions({
+    breaks: true,
+    gfm: true,
+  });
+});
+
+// ═══════════════════════════════════════════════════════
+// API KEY MANAGEMENT
+// ═══════════════════════════════════════════════════════
+function saveKeyFromModal() {
+  const key = document.getElementById('modalApiKey').value.trim();
+  if (!key || !key.startsWith('AIza')) {
+    showToast('⚠️ API Key không hợp lệ. Key phải bắt đầu bằng "AIza"', 'error');
+    return;
+  }
+  apiKey = key;
+  localStorage.setItem('nova_api_key', key);
+  document.getElementById('sidebarApiKey').value = key;
+  closeModal();
+  updateStatus(true);
+  document.getElementById('sendBtn').disabled = false;
+  showToast('✅ Kết nối thành công!', 'success');
+}
+
+function saveKeyFromSidebar() {
+  const key = document.getElementById('sidebarApiKey').value.trim();
+  if (!key || !key.startsWith('AIza')) {
+    showToast('⚠️ API Key không hợp lệ', 'error');
+    return;
+  }
+  apiKey = key;
+  localStorage.setItem('nova_api_key', key);
+  closeModal();
+  updateStatus(true);
+  document.getElementById('sendBtn').disabled = false;
+  showToast('✅ API Key đã được lưu!', 'success');
+}
+
+function previewKey() {
+  const key = document.getElementById('sidebarApiKey').value.trim();
+  document.getElementById('sendBtn').disabled = !key.startsWith('AIza');
+}
+
+function updateStatus(connected) {
+  const dot = document.getElementById('statusDot');
+  const text = document.getElementById('statusText');
+  if (connected) {
+    dot.className = 'dot connected';
+    text.textContent = 'Đã kết nối API';
+  } else {
+    dot.className = 'dot';
+    text.textContent = 'Chưa kết nối API';
+  }
+}
+
+function closeModal() {
+  document.getElementById('apiModal').style.display = 'none';
+}
+
+// ═══════════════════════════════════════════════════════
+// SEARCH TOGGLE
+// ═══════════════════════════════════════════════════════
+function toggleSearch() {
+  useSearch = !useSearch;
+  const btn = document.getElementById('searchToggle');
+  btn.className = 'search-toggle' + (useSearch ? ' active' : '');
+  btn.innerHTML = `🔍 Tìm kiếm web: <strong>${useSearch ? 'BẬT' : 'TẮT'}</strong>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// CHAT
+// ═══════════════════════════════════════════════════════
+function handleKeyDown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 180) + 'px';
+  document.getElementById('sendBtn').disabled = !el.value.trim() || !apiKey;
+}
+
+function sendSuggestion(text) {
+  document.getElementById('chatInput').value = text;
+  sendMessage();
+}
+
+async function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text || isLoading) return;
+  if (!apiKey) {
+    document.getElementById('apiModal').style.display = 'flex';
+    return;
+  }
+
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('sendBtn').disabled = true;
+  isLoading = true;
+
+  // Show messages container, hide welcome
+  document.getElementById('welcomeScreen').style.display = 'none';
+  document.getElementById('messagesContainer').style.display = 'flex';
+
+  // New session if needed
+  if (!currentSessionId) {
+    currentSessionId = Date.now().toString();
+    chatSessions.unshift({ id: currentSessionId, title: text.slice(0, 50), ts: Date.now() });
+    saveSessions();
+    renderHistorySidebar();
+  }
+
+  // Add user message
+  appendMessage('user', text);
+
+  // Add AI thinking bubble
+  const thinkingId = 'thinking-' + Date.now();
+  appendThinking(thinkingId);
+
+  // Add to history
+  conversationHistory.push({ role: 'user', parts: [{ text }] });
+
+  try {
+    const { answerText, citations } = await callGemini(text);
+    
+    // Remove thinking bubble
+    document.getElementById(thinkingId)?.remove();
+    
+    // Append AI response
+    appendMessage('ai', answerText, citations);
+
+    // Add to history
+    conversationHistory.push({ role: 'model', parts: [{ text: answerText }] });
+
+  } catch (err) {
+    document.getElementById(thinkingId)?.remove();
+    const errMsg = err.message.includes('API_KEY_INVALID')
+      ? '❌ API Key không hợp lệ. Vui lòng kiểm tra lại.'
+      : `❌ Lỗi: ${err.message}`;
+    appendMessage('ai', errMsg, []);
+    console.error(err);
+  }
+
+  isLoading = false;
+  document.getElementById('sendBtn').disabled = false;
+  scrollToBottom();
+}
+
+// ═══════════════════════════════════════════════════════
+// GEMINI API
+// ═══════════════════════════════════════════════════════
+async function callGemini(userText) {
+  const model = 'gemini-2.0-flash';
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+  const systemInstruction = {
+    parts: [{
+      text: `Bạn là Nova AI – trợ lý AI thông minh chuyên tìm kiếm và tổng hợp thông tin chính xác.
+
+NGUYÊN TẮC TRẢ LỜI:
+1. Trả lời bằng tiếng Việt, rõ ràng, có cấu trúc.
+2. Với mỗi thông tin quan trọng, hãy trích dẫn nguồn.
+3. Nếu không chắc chắn về thông tin, hãy nói rõ "Tôi không chắc về điều này".
+4. Dùng Markdown để format câu trả lời (heading, bullet points, bold...).
+5. Ngắn gọn nhưng đầy đủ. Không lan man.`
+    }]
+  };
+
+  const tools = useSearch ? [{
+    google_search: {}
+  }] : [];
+
+  const body = {
+    system_instruction: systemInstruction,
+    contents: conversationHistory.concat([{
+      role: 'user',
+      parts: [{ text: userText }]
+    }]),
+    tools: tools.length ? tools : undefined,
+    generation_config: {
+      temperature: 0.7,
+      top_p: 0.95,
+      max_output_tokens: 4096,
+    }
+  };
+
+  // Remove undefined keys
+  if (!body.tools) delete body.tools;
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const err = await res.json();
+    throw new Error(err.error?.message || `HTTP ${res.status}`);
+  }
+
+  const data = await res.json();
+  const candidate = data.candidates?.[0];
+  if (!candidate) throw new Error('Không nhận được phản hồi từ API');
+
+  // Extract text
+  let answerText = '';
+  for (const part of candidate.content?.parts || []) {
+    if (part.text) answerText += part.text;
+  }
+
+  // Extract citations from grounding metadata
+  const citations = [];
+  const groundingMeta = candidate.groundingMetadata;
+  if (groundingMeta?.groundingChunks) {
+    for (const chunk of groundingMeta.groundingChunks) {
+      if (chunk.web) {
+        citations.push({
+          title: chunk.web.title || chunk.web.uri,
+          uri: chunk.web.uri
+        });
+      }
+    }
+  }
+
+  return { answerText, citations };
+}
+
+// ═══════════════════════════════════════════════════════
+// DOM HELPERS
+// ═══════════════════════════════════════════════════════
+function appendMessage(role, text, citations = []) {
+  const container = document.getElementById('messagesContainer');
+  const msg = document.createElement('div');
+  msg.className = `message ${role}`;
+
+  const avatar = document.createElement('div');
+  avatar.className = `avatar ${role}`;
+  avatar.textContent = role === 'ai' ? '✦' : '👤';
+
+  const content = document.createElement('div');
+  content.className = 'message-content';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'message-bubble';
+
+  if (role === 'ai') {
+    bubble.innerHTML = marked.parse(text);
+    // Open links in new tab
+    bubble.querySelectorAll('a').forEach(a => {
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+    });
+  } else {
+    bubble.textContent = text;
+  }
+
+  content.appendChild(bubble);
+
+  // Citations block
+  if (role === 'ai' && citations.length > 0) {
+    const citBlock = document.createElement('div');
+    citBlock.className = 'citations-block';
+    citBlock.innerHTML = `
+      <div class="citations-label">🔗 Nguồn tham khảo (${citations.length})</div>
+      <div class="citation-list">
+        ${citations.map((c, i) => `
+          <div class="citation-item">
+            <div class="citation-num">${i + 1}</div>
+            <a class="citation-link" href="${c.uri}" target="_blank" rel="noopener noreferrer">
+              <span class="citation-title">${escapeHtml(c.title || 'Nguồn không có tiêu đề')}</span>
+              <span class="citation-url">${escapeHtml(c.uri)}</span>
+            </a>
+          </div>
+        `).join('')}
+      </div>
+    `;
+    content.appendChild(citBlock);
+  }
+
+  if (role === 'ai') {
+    msg.appendChild(avatar);
+    msg.appendChild(content);
+  } else {
+    msg.appendChild(content);
+    msg.appendChild(avatar);
+  }
+
+  container.appendChild(msg);
+  scrollToBottom();
+}
+
+function appendThinking(id) {
+  const container = document.getElementById('messagesContainer');
+  const msg = document.createElement('div');
+  msg.className = 'message ai';
+  msg.id = id;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'avatar ai';
+  avatar.textContent = '✦';
+
+  const content = document.createElement('div');
+  content.className = 'message-content';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'message-bubble';
+
+  if (useSearch) {
+    bubble.innerHTML = `
+      <div class="search-indicator">
+        <div class="search-spinner"></div>
+        Đang tìm kiếm thông tin trên web...
+      </div>
+    `;
+  } else {
+    bubble.innerHTML = `
+      <div class="typing-indicator">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    `;
+  }
+
+  content.appendChild(bubble);
+  msg.appendChild(avatar);
+  msg.appendChild(content);
+  container.appendChild(msg);
+  scrollToBottom();
+}
+
+function scrollToBottom() {
+  const chatArea = document.getElementById('chatArea');
+  setTimeout(() => {
+    chatArea.scrollTo({ top: chatArea.scrollHeight, behavior: 'smooth' });
+  }, 50);
+}
+
+function escapeHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════════════
+// SESSION MANAGEMENT
+// ═══════════════════════════════════════════════════════
+function newChat() {
+  currentSessionId = null;
+  conversationHistory = [];
+  document.getElementById('messagesContainer').innerHTML = '';
+  document.getElementById('messagesContainer').style.display = 'none';
+  document.getElementById('welcomeScreen').style.display = 'flex';
+  document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+}
+
+function saveSessions() {
+  localStorage.setItem('nova_sessions', JSON.stringify(chatSessions.slice(0, 20)));
+}
+
+function renderHistorySidebar() {
+  const container = document.getElementById('chatHistory');
+  if (chatSessions.length === 0) {
+    container.innerHTML = `<div style="padding:12px 10px;font-size:12px;color:var(--text-muted);text-align:center">Chưa có cuộc trò chuyện nào</div>`;
+    return;
+  }
+  container.innerHTML = chatSessions.map(s => `
+    <div class="history-item ${s.id === currentSessionId ? 'active' : ''}" 
+         onclick="loadSession('${s.id}')" id="hist-${s.id}">
+      💬 ${escapeHtml(s.title)}
+    </div>
+  `).join('');
+}
+
+function loadSession(id) {
+  // Highlight active
+  document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+  document.getElementById('hist-' + id)?.classList.add('active');
+  currentSessionId = id;
+  // Note: Full message reload would require storing messages - simplified UX
+  showToast('💬 Đã chọn cuộc trò chuyện', 'success');
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+function showToast(msg, type = '') {
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.textContent = msg;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 3000);
+}
+</script>
+</body>
+</html>
