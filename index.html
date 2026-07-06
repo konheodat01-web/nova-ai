@@ -1,423 +1,198 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Nova AI – Trợ lý tìm kiếm thông minh</title>
-  <meta name="description" content="Trợ lý AI tìm kiếm thông tin thời gian thực, tổng hợp câu trả lời có trích dẫn nguồn để xác minh tính đúng sai." />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Nova AI Local</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    :root {
-      --bg-primary: #0d0d0f;
-      --bg-secondary: #16161a;
-      --bg-tertiary: #1e1e24;
-      --bg-input: #1a1a20;
-      --bg-hover: #22222a;
-      --bg-message-user: #1e3a5f;
-      --bg-message-ai: #16161a;
-      --border: #2a2a35;
-      --border-light: #35353f;
-      --accent: #7c6ff7;
-      --accent-hover: #9b8fff;
-      --accent-glow: rgba(124, 111, 247, 0.15);
-      --text-primary: #e8e8f0;
-      --text-secondary: #9898b0;
-      --text-muted: #5a5a72;
-      --text-accent: #a899ff;
-      --success: #4ade80;
-      --warning: #fbbf24;
-      --error: #f87171;
-      --citation-bg: #1a1a2e;
-      --citation-border: #7c6ff7;
-      --sidebar-width: 260px;
-      --radius: 12px;
-      --radius-sm: 8px;
-      --radius-lg: 16px;
-      --shadow: 0 4px 24px rgba(0,0,0,0.4);
-      --shadow-lg: 0 8px 48px rgba(0,0,0,0.6);
-      --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    :root{
+      --bg:#0d0d0f;--bg2:#16161a;--bg3:#1e1e24;--bgi:#1a1a20;--bgh:#22222a;
+      --bd:#2a2a35;--bdl:#35353f;
+      --acc:#7c6ff7;--acch:#9b8fff;--accg:rgba(124,111,247,.15);
+      --t1:#e8e8f0;--t2:#9898b0;--tm:#5a5a72;--ta:#a899ff;
+      --ok:#4ade80;--warn:#fbbf24;--err:#f87171;
+      --r:12px;--rs:8px;--rl:16px;
+      --tr:all .2s cubic-bezier(.4,0,.2,1);
     }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: 'Inter', system-ui, sans-serif;
-      background: var(--bg-primary);
-      color: var(--text-primary);
-      height: 100dvh;
-      display: flex;
-      overflow: hidden;
-    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--t1);height:100dvh;display:flex;overflow:hidden}
 
     /* ── SIDEBAR ── */
-    .sidebar {
-      width: var(--sidebar-width);
-      background: var(--bg-secondary);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-      flex-shrink: 0;
-    }
+    .sidebar{width:250px;background:var(--bg2);border-right:1px solid var(--bd);display:flex;flex-direction:column;flex-shrink:0}
+    .sidebar-header{padding:18px 14px 12px;border-bottom:1px solid var(--bd)}
+    .logo{display:flex;align-items:center;gap:9px;margin-bottom:14px}
+    .logo-icon{width:32px;height:32px;background:linear-gradient(135deg,#7c6ff7,#a855f7);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px;box-shadow:0 0 14px rgba(124,111,247,.4)}
+    .logo-text{font-size:17px;font-weight:700;background:linear-gradient(135deg,#a899ff,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .new-btn{width:100%;padding:9px 12px;background:var(--accg);border:1px solid var(--acc);border-radius:var(--rs);color:var(--ta);font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:7px;transition:var(--tr);font-family:inherit}
+    .new-btn:hover{background:rgba(124,111,247,.25)}
+    .sl{padding:12px 14px 5px;font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--tm)}
+    .hist{flex:1;overflow-y:auto;padding:3px 7px}
+    .hist::-webkit-scrollbar{width:3px}
+    .hist::-webkit-scrollbar-thumb{background:var(--bdl);border-radius:3px}
+    .hi{padding:8px 9px;border-radius:var(--rs);cursor:pointer;font-size:12px;color:var(--t2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:var(--tr)}
+    .hi:hover{background:var(--bgh);color:var(--t1)}
+    .hi.active{background:var(--accg);color:var(--ta)}
+    .sidebar-footer{padding:10px 14px;border-top:1px solid var(--bd)}
+    .platform-status{display:flex;flex-direction:column;gap:5px}
+    .ps-label{font-size:10px;color:var(--tm);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px}
+    .ps-row{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--t2)}
+    .ps-dot{width:6px;height:6px;border-radius:50%;background:var(--tm);flex-shrink:0}
+    .ps-dot.on{background:var(--ok);box-shadow:0 0 5px var(--ok)}
+    .ps-dot.off{background:var(--err)}
 
-    .sidebar-header {
-      padding: 20px 16px 12px;
-      border-bottom: 1px solid var(--border);
-    }
+    /* ── MAIN ── */
+    .main{flex:1;display:flex;flex-direction:column;overflow:hidden}
 
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-    .logo-icon {
-      width: 34px; height: 34px;
-      background: linear-gradient(135deg, #7c6ff7, #a855f7);
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 18px;
-      box-shadow: 0 0 16px rgba(124,111,247,0.4);
-      flex-shrink: 0;
-    }
-    .logo-text {
-      font-size: 18px; font-weight: 700;
-      background: linear-gradient(135deg, #a899ff, #c084fc);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-
-    .new-chat-btn {
-      width: 100%; padding: 10px 14px;
-      background: var(--accent-glow);
-      border: 1px solid var(--accent);
-      border-radius: var(--radius-sm);
-      color: var(--text-accent);
-      font-size: 14px; font-weight: 500;
-      cursor: pointer;
-      display: flex; align-items: center; gap: 8px;
-      transition: var(--transition); font-family: inherit;
-    }
-    .new-chat-btn:hover { background: rgba(124,111,247,0.25); box-shadow: 0 0 12px rgba(124,111,247,0.2); }
-
-    .sidebar-section-label {
-      padding: 14px 16px 6px;
-      font-size: 11px; font-weight: 600;
-      text-transform: uppercase; letter-spacing: 0.08em;
-      color: var(--text-muted);
-    }
-
-    .chat-history {
-      flex: 1; overflow-y: auto; padding: 4px 8px;
-    }
-    .chat-history::-webkit-scrollbar { width: 4px; }
-    .chat-history::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
-
-    .history-item {
-      padding: 9px 10px; border-radius: var(--radius-sm);
-      cursor: pointer; font-size: 13px; color: var(--text-secondary);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      transition: var(--transition);
-    }
-    .history-item:hover { background: var(--bg-hover); color: var(--text-primary); }
-    .history-item.active { background: var(--accent-glow); color: var(--text-accent); }
-
-    .sidebar-footer {
-      padding: 12px 16px; border-top: 1px solid var(--border);
-    }
-    .api-key-section { display: flex; flex-direction: column; gap: 6px; }
-    .api-key-label {
-      font-size: 11px; color: var(--text-muted); font-weight: 500;
-      display: flex; align-items: center; gap: 4px;
-    }
-    .api-key-label .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--error); }
-    .api-key-label .dot.connected { background: var(--success); }
-    .api-key-input {
-      width: 100%; padding: 8px 10px;
-      background: var(--bg-input); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); color: var(--text-primary);
-      font-size: 12px; font-family: 'JetBrains Mono', monospace;
-      outline: none; transition: var(--transition);
-    }
-    .api-key-input:focus { border-color: var(--accent); }
-    .api-key-input::placeholder { color: var(--text-muted); }
-    .api-key-save-btn {
-      padding: 7px; background: var(--accent); border: none;
-      border-radius: var(--radius-sm); color: white;
-      font-size: 12px; font-weight: 600; cursor: pointer;
-      transition: var(--transition); font-family: inherit;
-    }
-    .api-key-save-btn:hover { background: var(--accent-hover); }
-
-    /* ── MAIN AREA ── */
-    .main { flex: 1; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
-
-    /* ── TOP BAR ── */
-    .topbar {
-      padding: 10px 20px; border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-      background: var(--bg-secondary); gap: 10px; flex-wrap: wrap;
-    }
-    .model-selector-wrap {
-      display: flex; align-items: center; gap: 8px;
-    }
-    .model-selector {
-      padding: 7px 12px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-light);
-      border-radius: 20px;
-      color: var(--text-secondary);
-      font-size: 12px; font-family: inherit;
-      outline: none; cursor: pointer;
-      transition: var(--transition);
-      appearance: none;
-      -webkit-appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%239898b0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 12px center;
-      padding-right: 30px;
-    }
-    .model-selector:focus { border-color: var(--accent); }
-    .model-selector option { background: #1e1e24; color: var(--text-primary); }
-
-    .status-dot-wrap {
-      display: flex; align-items: center; gap: 6px;
-      padding: 6px 10px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-light);
-      border-radius: 20px;
-      font-size: 12px; color: var(--text-secondary);
-    }
-    .pulse {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--success);
-      box-shadow: 0 0 6px var(--success);
-      animation: pulse 2s infinite;
-    }
-    .pulse.offline { background: var(--error); box-shadow: 0 0 6px var(--error); animation: none; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-    .search-toggle {
-      display: flex; align-items: center; gap: 8px;
-      padding: 6px 14px;
-      background: var(--bg-tertiary); border: 1px solid var(--border-light);
-      border-radius: 20px; font-size: 12px; color: var(--text-secondary);
-      cursor: pointer; transition: var(--transition); font-family: inherit;
-    }
-    .search-toggle.active { background: var(--accent-glow); border-color: var(--accent); color: var(--text-accent); }
-    .search-toggle:hover { border-color: var(--accent); }
+    /* ── TOPBAR ── */
+    .topbar{padding:10px 18px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;background:var(--bg2);gap:8px;flex-wrap:wrap}
+    .model-sel{padding:6px 28px 6px 10px;background:var(--bg3);border:1px solid var(--bdl);border-radius:20px;color:var(--t2);font-size:12px;font-family:inherit;outline:none;cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%239898b0' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center}
+    .model-sel option{background:#1e1e24;color:var(--t1)}
+    .topbar-right{display:flex;align-items:center;gap:8px}
+    .status-badge{display:flex;align-items:center;gap:6px;padding:5px 10px;background:var(--bg3);border:1px solid var(--bdl);border-radius:20px;font-size:11px;color:var(--t2)}
+    .pulse{width:6px;height:6px;border-radius:50%;background:var(--ok);box-shadow:0 0 5px var(--ok);animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    .settings-btn{padding:6px 12px;background:var(--bg3);border:1px solid var(--bdl);border-radius:20px;font-size:12px;color:var(--t2);cursor:pointer;display:flex;align-items:center;gap:5px;transition:var(--tr);font-family:inherit}
+    .settings-btn:hover{border-color:var(--acc);color:var(--ta)}
 
     /* ── CHAT AREA ── */
-    .chat-area {
-      flex: 1; overflow-y: auto; padding: 24px 20px; scroll-behavior: smooth;
-    }
-    .chat-area::-webkit-scrollbar { width: 5px; }
-    .chat-area::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 4px; }
+    .chat-area{flex:1;overflow-y:auto;padding:20px 18px;scroll-behavior:smooth}
+    .chat-area::-webkit-scrollbar{width:4px}
+    .chat-area::-webkit-scrollbar-thumb{background:var(--bdl);border-radius:4px}
 
-    /* ── WELCOME SCREEN ── */
-    .welcome {
-      display: flex; flex-direction: column; align-items: center;
-      justify-content: center; height: 100%; gap: 20px; text-align: center;
-    }
-    .welcome-icon {
-      width: 72px; height: 72px;
-      background: linear-gradient(135deg, #7c6ff7, #a855f7, #ec4899);
-      border-radius: 24px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 36px;
-      box-shadow: 0 0 40px rgba(124,111,247,0.3), 0 0 80px rgba(124,111,247,0.1);
-      animation: float 3s ease-in-out infinite;
-    }
-    @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
-    .welcome h1 {
-      font-size: 28px; font-weight: 700;
-      background: linear-gradient(135deg, #e8e8f0, #a899ff, #c084fc);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-    }
-    .welcome p { font-size: 15px; color: var(--text-secondary); max-width: 500px; line-height: 1.6; }
-
-    .model-info-banner {
-      padding: 10px 16px;
-      background: var(--bg-tertiary);
-      border: 1px solid var(--border-light);
-      border-radius: var(--radius);
-      font-size: 12px; color: var(--text-muted);
-      max-width: 500px;
-      text-align: left;
-      line-height: 1.6;
-    }
-    .model-info-banner strong { color: var(--text-accent); }
-
-    .suggestion-grid {
-      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-      max-width: 560px; width: 100%; margin-top: 8px;
-    }
-    .suggestion-card {
-      padding: 14px 16px;
-      background: var(--bg-secondary); border: 1px solid var(--border);
-      border-radius: var(--radius); cursor: pointer;
-      text-align: left; transition: var(--transition);
-    }
-    .suggestion-card:hover { background: var(--bg-hover); border-color: var(--accent); box-shadow: 0 0 16px var(--accent-glow); }
-    .suggestion-card .icon { font-size: 20px; margin-bottom: 6px; }
-    .suggestion-card .title { font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 3px; }
-    .suggestion-card .desc { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
+    /* ── WELCOME ── */
+    .welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:18px;text-align:center}
+    .wicon{width:68px;height:68px;background:linear-gradient(135deg,#7c6ff7,#a855f7,#ec4899);border-radius:22px;display:flex;align-items:center;justify-content:center;font-size:34px;box-shadow:0 0 36px rgba(124,111,247,.3);animation:float 3s ease-in-out infinite}
+    @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+    .welcome h1{font-size:26px;font-weight:700;background:linear-gradient(135deg,#e8e8f0,#a899ff,#c084fc);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .welcome p{font-size:14px;color:var(--t2);max-width:480px;line-height:1.6}
+    .sugg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:520px;width:100%;margin-top:6px}
+    .sugg{padding:12px 14px;background:var(--bg2);border:1px solid var(--bd);border-radius:var(--r);cursor:pointer;text-align:left;transition:var(--tr)}
+    .sugg:hover{background:var(--bgh);border-color:var(--acc);box-shadow:0 0 14px var(--accg)}
+    .sugg .ic{font-size:18px;margin-bottom:5px}
+    .sugg .tt{font-size:12px;font-weight:600;color:var(--t1);margin-bottom:2px}
+    .sugg .dd{font-size:11px;color:var(--tm);line-height:1.4}
 
     /* ── MESSAGES ── */
-    .messages-container {
-      max-width: 780px; margin: 0 auto; width: 100%;
-      display: flex; flex-direction: column; gap: 24px;
-    }
+    .msgs{max-width:760px;margin:0 auto;width:100%;display:flex;flex-direction:column;gap:20px}
+    .msg{display:flex;gap:12px;animation:fadeUp .3s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+    .msg.user{flex-direction:row-reverse}
+    .av{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+    .av.ai{background:linear-gradient(135deg,#7c6ff7,#a855f7);box-shadow:0 0 10px rgba(124,111,247,.3)}
+    .av.user{background:linear-gradient(135deg,#1e3a5f,#2563eb)}
+    .mc{max-width:82%;display:flex;flex-direction:column;gap:5px}
+    .msg.user .mc{align-items:flex-end}
+    .meta{font-size:10px;color:var(--tm);padding:0 3px;display:flex;align-items:center;gap:6px}
+    .platform-tag{padding:1px 6px;background:var(--bg3);border:1px solid var(--bdl);border-radius:10px;font-size:10px;color:var(--ta)}
+    .bub{padding:12px 16px;border-radius:var(--rl);font-size:14px;line-height:1.7}
+    .msg.user .bub{background:var(--bg);border:1px solid rgba(37,99,235,.3);border-top-right-radius:4px;color:var(--t1);background:#1e3a5f}
+    .msg.ai .bub{background:var(--bg2);border:1px solid var(--bd);border-top-left-radius:4px}
+    .bub p{margin-bottom:9px}.bub p:last-child{margin-bottom:0}
+    .bub h1,.bub h2,.bub h3{margin:12px 0 7px;font-weight:600}
+    .bub h1{font-size:17px}.bub h2{font-size:15px}.bub h3{font-size:13px}
+    .bub strong{color:#c4b5fd;font-weight:600}
+    .bub code{background:#0d0d1a;border:1px solid var(--bdl);padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:12px;color:#a5b4fc}
+    .bub pre{background:#0a0a12;border:1px solid var(--bd);border-radius:var(--rs);padding:12px;overflow-x:auto;margin:9px 0}
+    .bub pre code{background:none;border:none;padding:0;color:#e2e8f0}
+    .bub ul,.bub ol{padding-left:18px;margin:7px 0;display:flex;flex-direction:column;gap:3px}
+    .bub a{color:var(--ta);text-decoration:none}.bub a:hover{text-decoration:underline}
+    .bub table{width:100%;border-collapse:collapse;margin:9px 0;font-size:12px}
+    .bub th,.bub td{padding:7px 10px;border:1px solid var(--bd)}
+    .bub th{background:var(--bg3);font-weight:600}
+    .bub blockquote{border-left:3px solid var(--acc);padding-left:10px;margin:9px 0;color:var(--t2);font-style:italic}
+    .bub hr{border:none;border-top:1px solid var(--bd);margin:12px 0}
 
-    .message { display: flex; gap: 14px; animation: fadeInUp 0.3s ease; }
-    @keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .message.user { flex-direction: row-reverse; }
+    /* ── SOURCES ── */
+    .sources{margin-top:8px;padding:10px 12px;background:#1a1a2e;border:1px solid rgba(124,111,247,.2);border-left:3px solid var(--acc);border-radius:var(--rs)}
+    .src-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--ta);margin-bottom:7px;display:flex;align-items:center;gap:4px}
+    .src-list{display:flex;flex-direction:column;gap:5px}
+    .src-item{display:flex;align-items:flex-start;gap:7px;font-size:11px}
+    .src-num{min-width:18px;height:18px;background:rgba(124,111,247,.2);border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--ta);flex-shrink:0}
+    .src-link{color:var(--t2);text-decoration:none;line-height:1.4;word-break:break-word;transition:var(--tr)}
+    .src-link:hover{color:var(--ta);text-decoration:underline}
+    .src-platform{display:inline-block;padding:0 4px;border-radius:3px;font-size:9px;font-weight:600;margin-right:4px;text-transform:uppercase}
+    .src-platform.reddit{background:rgba(255,69,0,.2);color:#ff7043}
+    .src-platform.twitter{background:rgba(29,161,242,.2);color:#29b6f6}
+    .src-platform.xhs{background:rgba(255,64,64,.2);color:#ef5350}
+    .src-platform.bilibili{background:rgba(0,161,214,.2);color:#00b0ff}
+    .src-platform.web{background:rgba(124,111,247,.2);color:var(--ta)}
 
-    .avatar {
-      width: 36px; height: 36px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 16px; flex-shrink: 0;
-    }
-    .avatar.ai { background: linear-gradient(135deg, #7c6ff7, #a855f7); box-shadow: 0 0 12px rgba(124,111,247,0.3); }
-    .avatar.user { background: linear-gradient(135deg, #1e3a5f, #2563eb); }
-
-    .message-content { max-width: 82%; display: flex; flex-direction: column; gap: 6px; }
-    .message.user .message-content { align-items: flex-end; }
-
-    .message-meta { font-size: 11px; color: var(--text-muted); padding: 0 4px; }
-
-    .message-bubble {
-      padding: 14px 18px; border-radius: var(--radius-lg);
-      font-size: 14px; line-height: 1.7; position: relative;
-    }
-    .message.user .message-bubble {
-      background: var(--bg-message-user); border: 1px solid rgba(37,99,235,0.3);
-      border-top-right-radius: 4px; color: var(--text-primary);
-    }
-    .message.ai .message-bubble {
-      background: var(--bg-message-ai); border: 1px solid var(--border);
-      border-top-left-radius: 4px;
-    }
-
-    /* Markdown */
-    .message-bubble p { margin-bottom: 10px; }
-    .message-bubble p:last-child { margin-bottom: 0; }
-    .message-bubble h1, .message-bubble h2, .message-bubble h3 { margin: 14px 0 8px; font-weight: 600; }
-    .message-bubble h1 { font-size: 18px; } .message-bubble h2 { font-size: 16px; } .message-bubble h3 { font-size: 14px; }
-    .message-bubble strong { color: #c4b5fd; font-weight: 600; }
-    .message-bubble em { color: var(--text-secondary); font-style: italic; }
-    .message-bubble code { background: #0d0d1a; border: 1px solid var(--border-light); padding: 2px 6px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 12.5px; color: #a5b4fc; }
-    .message-bubble pre { background: #0a0a12; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; overflow-x: auto; margin: 10px 0; }
-    .message-bubble pre code { background: none; border: none; padding: 0; color: #e2e8f0; }
-    .message-bubble ul, .message-bubble ol { padding-left: 20px; margin: 8px 0; display: flex; flex-direction: column; gap: 4px; }
-    .message-bubble li { line-height: 1.6; }
-    .message-bubble a { color: var(--text-accent); text-decoration: none; }
-    .message-bubble a:hover { text-decoration: underline; }
-    .message-bubble table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 13px; }
-    .message-bubble th, .message-bubble td { padding: 8px 12px; border: 1px solid var(--border); }
-    .message-bubble th { background: var(--bg-tertiary); font-weight: 600; }
-    .message-bubble blockquote { border-left: 3px solid var(--accent); padding-left: 12px; margin: 10px 0; color: var(--text-secondary); font-style: italic; }
-    .message-bubble hr { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
-
-    /* ── CITATIONS ── */
-    .citations-block {
-      margin-top: 10px; padding: 12px 14px;
-      background: var(--citation-bg); border: 1px solid rgba(124,111,247,0.2);
-      border-left: 3px solid var(--citation-border);
-      border-radius: var(--radius-sm);
-    }
-    .citations-label {
-      font-size: 11px; font-weight: 600; text-transform: uppercase;
-      letter-spacing: 0.06em; color: var(--text-accent);
-      margin-bottom: 8px; display: flex; align-items: center; gap: 5px;
-    }
-    .citation-list { display: flex; flex-direction: column; gap: 6px; }
-    .citation-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; }
-    .citation-num {
-      min-width: 20px; height: 20px;
-      background: rgba(124,111,247,0.2); border-radius: 4px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 10px; font-weight: 700; color: var(--text-accent); flex-shrink: 0;
-    }
-    .citation-link { color: var(--text-secondary); text-decoration: none; line-height: 1.4; transition: var(--transition); word-break: break-word; }
-    .citation-link:hover { color: var(--text-accent); text-decoration: underline; }
-    .citation-domain { font-size: 11px; color: var(--text-muted); }
-
-    /* ── TYPING ── */
-    .typing-indicator { display: flex; align-items: center; gap: 5px; padding: 14px 18px; }
-    .typing-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-accent); animation: typingBounce 1.2s infinite; }
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; } .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes typingBounce { 0%, 100% { transform: translateY(0); opacity: 0.4; } 50% { transform: translateY(-5px); opacity: 1; } }
-
-    .search-indicator { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-accent); padding: 8px 0; animation: fadeInUp 0.2s ease; }
-    .search-spinner { width: 14px; height: 14px; border: 2px solid rgba(124,111,247,0.2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    /* ── THINKING ── */
+    .typing{display:flex;align-items:center;gap:4px;padding:12px 16px}
+    .td{width:6px;height:6px;border-radius:50%;background:var(--ta);animation:tb 1.2s infinite}
+    .td:nth-child(2){animation-delay:.2s}.td:nth-child(3){animation-delay:.4s}
+    @keyframes tb{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-5px);opacity:1}}
+    .searching{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ta);padding:6px 0}
+    .spin{width:13px;height:13px;border:2px solid rgba(124,111,247,.2);border-top-color:var(--acc);border-radius:50%;animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
 
     /* ── INPUT ── */
-    .input-area { padding: 16px 20px; background: var(--bg-secondary); border-top: 1px solid var(--border); }
-    .input-container { max-width: 780px; margin: 0 auto; }
-    .input-wrapper {
-      display: flex; align-items: flex-end; gap: 10px;
-      background: var(--bg-input); border: 1.5px solid var(--border-light);
-      border-radius: var(--radius-lg); padding: 12px 14px; transition: var(--transition);
-    }
-    .input-wrapper:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
-    .chat-input {
-      flex: 1; background: none; border: none; outline: none;
-      color: var(--text-primary); font-size: 15px; font-family: inherit;
-      line-height: 1.5; resize: none; max-height: 180px; overflow-y: auto; scrollbar-width: none;
-    }
-    .chat-input::-webkit-scrollbar { display: none; }
-    .chat-input::placeholder { color: var(--text-muted); }
-    .send-btn {
-      width: 38px; height: 38px; background: var(--accent); border: none;
-      border-radius: 10px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: var(--transition); flex-shrink: 0;
-    }
-    .send-btn:hover:not(:disabled) { background: var(--accent-hover); box-shadow: 0 0 16px rgba(124,111,247,0.4); transform: scale(1.05); }
-    .send-btn:disabled { background: var(--bg-hover); cursor: not-allowed; opacity: 0.5; }
-    .input-footer { text-align: center; margin-top: 8px; font-size: 11px; color: var(--text-muted); }
+    .input-area{padding:14px 18px;background:var(--bg2);border-top:1px solid var(--bd)}
+    .input-wrap{max-width:760px;margin:0 auto}
+    .ibox{display:flex;align-items:flex-end;gap:8px;background:var(--bgi);border:1.5px solid var(--bdl);border-radius:var(--rl);padding:10px 12px;transition:var(--tr)}
+    .ibox:focus-within{border-color:var(--acc);box-shadow:0 0 0 3px var(--accg)}
+    .tinput{flex:1;background:none;border:none;outline:none;color:var(--t1);font-size:14px;font-family:inherit;line-height:1.5;resize:none;max-height:160px;overflow-y:auto;scrollbar-width:none}
+    .tinput::-webkit-scrollbar{display:none}
+    .tinput::placeholder{color:var(--tm)}
+    .send-btn{width:36px;height:36px;background:var(--acc);border:none;border-radius:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:var(--tr);flex-shrink:0}
+    .send-btn:hover:not(:disabled){background:var(--acch);box-shadow:0 0 14px rgba(124,111,247,.4);transform:scale(1.05)}
+    .send-btn:disabled{background:var(--bgh);cursor:not-allowed;opacity:.5}
+    .ifooter{text-align:center;margin-top:6px;font-size:10px;color:var(--tm)}
 
-    /* ── MODAL ── */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-      backdrop-filter: blur(4px); display: flex; align-items: center;
-      justify-content: center; z-index: 1000; animation: fadeIn 0.2s ease;
-    }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    .modal {
-      background: var(--bg-secondary); border: 1px solid var(--border-light);
-      border-radius: var(--radius-lg); padding: 32px;
-      max-width: 440px; width: 90%; box-shadow: var(--shadow-lg);
-      animation: slideUp 0.3s ease;
-    }
-    @keyframes slideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-    .modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; background: linear-gradient(135deg, #a899ff, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
-    .modal p { font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 20px; }
-    .modal a { color: var(--text-accent); }
-    .modal input { width: 100%; padding: 12px 14px; background: var(--bg-input); border: 1.5px solid var(--border-light); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 13px; font-family: 'JetBrains Mono', monospace; outline: none; margin-bottom: 14px; transition: var(--transition); }
-    .modal input:focus { border-color: var(--accent); }
-    .modal-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #7c6ff7, #a855f7); border: none; border-radius: var(--radius-sm); color: white; font-size: 15px; font-weight: 600; cursor: pointer; transition: var(--transition); font-family: inherit; }
-    .modal-btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(124,111,247,0.3); }
-    .modal-step { display: flex; align-items: flex-start; gap: 10px; padding: 10px; background: var(--bg-tertiary); border-radius: var(--radius-sm); margin-bottom: 12px; }
-    .step-num { width: 22px; height: 22px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; color: white; }
-    .step-text { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+    /* ── SETTINGS PANEL ── */
+    .settings-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px);z-index:100;display:none;align-items:flex-start;justify-content:flex-end}
+    .settings-overlay.open{display:flex}
+    .settings-panel{width:380px;height:100%;background:var(--bg2);border-left:1px solid var(--bdl);display:flex;flex-direction:column;animation:slideRight .25s ease;overflow-y:auto}
+    @keyframes slideRight{from{transform:translateX(100%)}to{transform:translateX(0)}}
+    .sp-header{padding:18px 18px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--bg2);z-index:10}
+    .sp-header h2{font-size:16px;font-weight:700;color:var(--t1)}
+    .sp-close{background:none;border:none;color:var(--t2);cursor:pointer;font-size:20px;line-height:1;padding:3px}
+    .sp-close:hover{color:var(--t1)}
+    .sp-section{padding:16px 18px;border-bottom:1px solid var(--bd)}
+    .sp-section:last-child{border-bottom:none}
+    .sp-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ta);margin-bottom:12px;display:flex;align-items:center;gap:6px}
+    .sp-label{font-size:12px;color:var(--t2);margin-bottom:5px;font-weight:500}
+    .sp-input{width:100%;padding:9px 11px;background:var(--bgi);border:1px solid var(--bdl);border-radius:var(--rs);color:var(--t1);font-size:12px;font-family:'JetBrains Mono',monospace;outline:none;transition:var(--tr);margin-bottom:10px}
+    .sp-input:focus{border-color:var(--acc)}
+    .sp-input::placeholder{color:var(--tm)}
+    .sp-select{width:100%;padding:9px 11px;background:var(--bgi);border:1px solid var(--bdl);border-radius:var(--rs);color:var(--t1);font-size:12px;font-family:inherit;outline:none;cursor:pointer;margin-bottom:10px;appearance:none}
+    .sp-select option{background:#1e1e24}
+    .sp-btn{padding:8px 14px;background:var(--acc);border:none;border-radius:var(--rs);color:white;font-size:12px;font-weight:600;cursor:pointer;transition:var(--tr);font-family:inherit}
+    .sp-btn:hover{background:var(--acch)}
+    .sp-btn.secondary{background:var(--bg3);border:1px solid var(--bdl);color:var(--t2)}
+    .sp-btn.secondary:hover{border-color:var(--acc);color:var(--ta)}
 
-    /* ── TOAST ── */
-    .toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 18px; background: var(--bg-tertiary); border: 1px solid var(--border-light); border-radius: var(--radius-sm); font-size: 13px; color: var(--text-primary); box-shadow: var(--shadow); display: flex; align-items: center; gap: 8px; animation: slideInRight 0.3s ease; z-index: 2000; }
-    .toast.success { border-color: var(--success); }
-    .toast.error { border-color: var(--error); }
-    @keyframes slideInRight { from { transform: translateX(100px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    /* Platform toggle card */
+    .platform-card{background:var(--bg3);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:10px}
+    .platform-card:last-child{margin-bottom:0}
+    .pc-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+    .pc-info{display:flex;align-items:center;gap:8px}
+    .pc-icon{font-size:18px}
+    .pc-name{font-size:13px;font-weight:600;color:var(--t1)}
+    .pc-desc{font-size:11px;color:var(--tm);margin-top:1px}
+    .toggle{position:relative;width:38px;height:20px;cursor:pointer}
+    .toggle input{opacity:0;width:0;height:0}
+    .toggle-slider{position:absolute;inset:0;background:var(--bd);border-radius:20px;transition:var(--tr)}
+    .toggle-slider:before{content:'';position:absolute;width:14px;height:14px;left:3px;top:3px;background:var(--t2);border-radius:50%;transition:var(--tr)}
+    .toggle input:checked + .toggle-slider{background:var(--acc)}
+    .toggle input:checked + .toggle-slider:before{transform:translateX(18px);background:white}
+    .pc-cookie{margin-top:10px;display:none}
+    .pc-cookie.show{display:block}
+    .cookie-hint{font-size:10px;color:var(--tm);margin-bottom:5px;line-height:1.4}
+    .pc-actions{display:flex;gap:6px;margin-top:8px}
+    .test-result{font-size:11px;margin-top:6px;padding:5px 8px;border-radius:4px;display:none}
+    .test-result.ok{background:rgba(74,222,128,.1);color:var(--ok);border:1px solid rgba(74,222,128,.2)}
+    .test-result.fail{background:rgba(248,113,113,.1);color:var(--err);border:1px solid rgba(248,113,113,.2)}
 
-    /* ── MOBILE ── */
-    @media (max-width: 700px) {
-      .sidebar { display: none; }
-      .suggestion-grid { grid-template-columns: 1fr; }
-      .message-content { max-width: 95%; }
-    }
+    /* Toast */
+    .toast{position:fixed;bottom:20px;right:20px;padding:10px 16px;background:var(--bg3);border:1px solid var(--bdl);border-radius:var(--rs);font-size:12px;color:var(--t1);box-shadow:0 4px 20px rgba(0,0,0,.4);display:flex;align-items:center;gap:7px;animation:slideR .3s ease;z-index:999}
+    .toast.ok{border-color:var(--ok)}.toast.err{border-color:var(--err)}
+    @keyframes slideR{from{transform:translateX(100px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+    @media(max-width:700px){.sidebar{display:none}.sugg-grid{grid-template-columns:1fr}.mc{max-width:95%}.settings-panel{width:100%}}
   </style>
 </head>
 <body>
@@ -429,521 +204,463 @@
       <div class="logo-icon">✦</div>
       <span class="logo-text">Nova AI</span>
     </div>
-    <button class="new-chat-btn" onclick="newChat()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    <button class="new-btn" onclick="newChat()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Cuộc trò chuyện mới
     </button>
   </div>
-  <div class="sidebar-section-label">Lịch sử</div>
-  <div class="chat-history" id="chatHistory">
-    <div style="padding:12px 10px;font-size:12px;color:var(--text-muted);text-align:center">
-      Chưa có cuộc trò chuyện nào
-    </div>
-  </div>
+  <div class="sl">Lịch sử</div>
+  <div class="hist" id="histList"><div style="padding:10px 8px;font-size:11px;color:var(--tm);text-align:center">Chưa có cuộc trò chuyện</div></div>
   <div class="sidebar-footer">
-    <div class="api-key-section">
-      <div class="api-key-label">
-        <div class="dot" id="statusDot"></div>
-        <span id="statusText">Chưa kết nối API</span>
-      </div>
-      <div style="display:flex;gap:6px">
-        <input type="password" class="api-key-input" id="sidebarApiKey" placeholder="sk-or-v1-..." />
-        <button class="api-key-save-btn" onclick="saveKeyFromSidebar()">Lưu</button>
-      </div>
+    <div class="platform-status">
+      <div class="ps-label">Nền tảng hoạt động</div>
+      <div class="ps-row"><div class="ps-dot" id="dot-reddit"></div><span>Reddit</span></div>
+      <div class="ps-row"><div class="ps-dot" id="dot-twitter"></div><span>Twitter/X</span></div>
+      <div class="ps-row"><div class="ps-dot" id="dot-xhs"></div><span>Xiaohongshu</span></div>
+      <div class="ps-row"><div class="ps-dot" id="dot-bilibili"></div><span>Bilibili</span></div>
     </div>
   </div>
 </aside>
 
 <!-- MAIN -->
 <main class="main">
-  <!-- TOPBAR -->
   <div class="topbar">
-    <div class="model-selector-wrap">
-      <div class="status-dot-wrap">
-        <div class="pulse" id="modelPulse"></div>
-        <span>OpenRouter</span>
-      </div>
-      <select class="model-selector" id="modelSelector" onchange="onModelChange()">
-        <optgroup label="🔍 Có Web Search tích hợp">
-          <option value="perplexity/sonar" selected>Perplexity Sonar (Search)</option>
-          <option value="perplexity/sonar-pro">Perplexity Sonar Pro (Search)</option>
-        </optgroup>
-        <optgroup label="🧠 Model mạnh">
-          <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash</option>
-          <option value="anthropic/claude-3.5-haiku">Claude 3.5 Haiku</option>
-          <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
-          <option value="deepseek/deepseek-chat-v3-0324:free">DeepSeek V3 (Free)</option>
-          <option value="meta-llama/llama-4-scout:free">Llama 4 Scout (Free)</option>
-        </optgroup>
-      </select>
+    <select class="model-sel" id="modelSel" onchange="saveModelPref()">
+      <optgroup label="🔍 Web Search tích hợp">
+        <option value="perplexity/sonar">Perplexity Sonar (Search)</option>
+        <option value="perplexity/sonar-pro">Perplexity Sonar Pro</option>
+      </optgroup>
+      <optgroup label="🧠 Model mạnh">
+        <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash</option>
+        <option value="anthropic/claude-3.5-haiku">Claude 3.5 Haiku</option>
+        <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+        <option value="deepseek/deepseek-chat-v3-0324:free">DeepSeek V3 (Free)</option>
+        <option value="meta-llama/llama-4-scout:free">Llama 4 Scout (Free)</option>
+      </optgroup>
+    </select>
+    <div class="topbar-right">
+      <div class="status-badge"><div class="pulse" id="serverPulse"></div><span>Local Server</span></div>
+      <button class="settings-btn" onclick="openSettings()">⚙️ Cài đặt</button>
     </div>
-    <button class="search-toggle active" id="searchToggle" onclick="toggleSearch()">
-      🔍 Web Search: <strong id="searchLabel">BẬT</strong>
-    </button>
   </div>
 
-  <!-- CHAT AREA -->
   <div class="chat-area" id="chatArea">
-    <div class="welcome" id="welcomeScreen">
-      <div class="welcome-icon">✦</div>
-      <h1>Xin chào! Tôi là Nova AI</h1>
-      <p>Trợ lý AI tìm kiếm thông tin thời gian thực qua <strong style="color:var(--text-accent)">OpenRouter</strong>.<br/>
-         Mọi câu trả lời đều kèm <strong style="color:var(--text-accent)">trích dẫn nguồn</strong> để bạn tự kiểm tra.</p>
-      <div class="model-info-banner">
-        💡 <strong>Perplexity Sonar</strong> (đang chọn) có khả năng tìm kiếm web tích hợp sẵn — luôn trả về thông tin mới nhất kèm nguồn. Bạn có thể đổi model ở thanh trên.
-      </div>
-      <div class="suggestion-grid">
-        <div class="suggestion-card" onclick="sendSuggestion('Tin tức công nghệ AI nổi bật nhất tuần này là gì?')">
-          <div class="icon">🤖</div>
-          <div class="title">Tin tức AI hôm nay</div>
-          <div class="desc">Cập nhật xu hướng AI mới nhất</div>
+    <div class="welcome" id="welcome">
+      <div class="wicon">✦</div>
+      <h1>Nova AI Local</h1>
+      <p>Tổng hợp thông tin từ <strong style="color:var(--ta)">Reddit, Twitter, Xiaohongshu, Bilibili</strong> + Web search.<br/>Câu trả lời kèm nguồn từng nền tảng để xác minh.</p>
+      <div class="sugg-grid">
+        <div class="sugg" onclick="qs('Mọi người trên Reddit đang nói gì về AI Agent tuần này?')">
+          <div class="ic">💬</div><div class="tt">Reddit trends</div><div class="dd">Thảo luận hot trên Reddit</div>
         </div>
-        <div class="suggestion-card" onclick="sendSuggestion('Các sản phẩm đang viral trên TikTok và Xiaohongshu tuần này?')">
-          <div class="icon">🔥</div>
-          <div class="title">Trend mạng xã hội</div>
-          <div class="desc">Sản phẩm đang hot trên TikTok/XHS</div>
+        <div class="sugg" onclick="qs('Sản phẩm nào đang viral trên Xiaohongshu tuần này?')">
+          <div class="ic">🔴</div><div class="tt">XHS viral</div><div class="dd">Xu hướng Tiểu Hồng Thư</div>
         </div>
-        <div class="suggestion-card" onclick="sendSuggestion('Hướng dẫn chi tiết chiến lược SEO Affiliate hiệu quả năm 2025?')">
-          <div class="icon">💰</div>
-          <div class="title">MMO & SEO Affiliate</div>
-          <div class="desc">Chiến lược kiếm tiền online</div>
+        <div class="sugg" onclick="qs('Video nào đang hot trên Bilibili về chủ đề công nghệ?')">
+          <div class="ic">📺</div><div class="tt">Bilibili hot</div><div class="dd">Nội dung trending B站</div>
         </div>
-        <div class="suggestion-card" onclick="sendSuggestion('Tổng hợp công cụ AI miễn phí tốt nhất cho content creator?')">
-          <div class="icon">🛠️</div>
-          <div class="title">Công cụ AI miễn phí</div>
-          <div class="desc">Tốt nhất cho content creator</div>
+        <div class="sugg" onclick="qs('Từ khóa SEO nào đang được thảo luận nhiều trong ngành MMO?')">
+          <div class="ic">💰</div><div class="tt">SEO & MMO</div><div class="dd">Cơ hội từ khóa mới nhất</div>
         </div>
       </div>
     </div>
-    <div class="messages-container" id="messagesContainer" style="display:none"></div>
+    <div class="msgs" id="msgs" style="display:none"></div>
   </div>
 
-  <!-- INPUT AREA -->
   <div class="input-area">
-    <div class="input-container">
-      <div class="input-wrapper">
-        <textarea id="chatInput" class="chat-input" rows="1"
-          placeholder="Hỏi bất kỳ điều gì... (Enter gửi, Shift+Enter xuống dòng)"
-          onkeydown="handleKeyDown(event)" oninput="autoResize(this)"></textarea>
-        <button class="send-btn" id="sendBtn" onclick="sendMessage()" disabled>
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
-          </svg>
+    <div class="input-wrap">
+      <div class="ibox">
+        <textarea id="tinput" class="tinput" rows="1" placeholder="Hỏi bất kỳ điều gì... (Enter gửi, Shift+Enter xuống dòng)"
+          onkeydown="kd(event)" oninput="ar(this)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="send()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
         </button>
       </div>
-      <div class="input-footer">Nova AI có thể mắc sai lầm. Hãy kiểm tra nguồn trích dẫn để xác minh thông tin quan trọng.</div>
+      <div class="ifooter">Nova AI Local · Dữ liệu từ MXH + Web · Luôn kiểm tra nguồn trích dẫn</div>
     </div>
   </div>
 </main>
 
-<!-- API KEY MODAL -->
-<div class="modal-overlay" id="apiModal">
-  <div class="modal">
-    <h2>✦ Kết nối OpenRouter API</h2>
-    <p>Nova AI sử dụng <a href="https://openrouter.ai" target="_blank">OpenRouter</a> để truy cập hàng chục model AI (Perplexity, Claude, GPT-4o, Llama...) qua một API key duy nhất.</p>
-    <div class="modal-step">
-      <div class="step-num">1</div>
-      <div class="step-text">Đăng ký tại <a href="https://openrouter.ai" target="_blank">openrouter.ai</a> → Vào <strong>Keys</strong> → Tạo API Key mới.</div>
+<!-- SETTINGS PANEL -->
+<div class="settings-overlay" id="settingsOverlay" onclick="overlayClick(event)">
+  <div class="settings-panel" id="settingsPanel">
+    <div class="sp-header">
+      <h2>⚙️ Cài đặt</h2>
+      <button class="sp-close" onclick="closeSettings()">×</button>
     </div>
-    <div class="modal-step">
-      <div class="step-num">2</div>
-      <div class="step-text">Nạp credit vào tài khoản (tối thiểu $5) hoặc dùng các model <strong>miễn phí</strong> (DeepSeek, Llama).</div>
+
+    <!-- OpenRouter -->
+    <div class="sp-section">
+      <div class="sp-title">🔑 OpenRouter API</div>
+      <div class="sp-label">API Key</div>
+      <input type="password" class="sp-input" id="orKey" placeholder="sk-or-v1-..." />
+      <div class="sp-label">Model mặc định</div>
+      <select class="sp-select" id="orModel">
+        <option value="perplexity/sonar">Perplexity Sonar (Search)</option>
+        <option value="perplexity/sonar-pro">Perplexity Sonar Pro</option>
+        <option value="google/gemini-2.0-flash-001">Gemini 2.0 Flash</option>
+        <option value="anthropic/claude-3.5-haiku">Claude 3.5 Haiku</option>
+        <option value="openai/gpt-4o-mini">GPT-4o Mini</option>
+        <option value="deepseek/deepseek-chat-v3-0324:free">DeepSeek V3 (Free)</option>
+        <option value="meta-llama/llama-4-scout:free">Llama 4 Scout (Free)</option>
+      </select>
+      <button class="sp-btn" onclick="saveApiSettings()">Lưu cài đặt</button>
     </div>
-    <div class="modal-step">
-      <div class="step-num">3</div>
-      <div class="step-text">Dán key bên dưới. Key lưu trong trình duyệt của bạn, không gửi đi đâu ngoài OpenRouter.</div>
+
+    <!-- Reddit -->
+    <div class="sp-section">
+      <div class="sp-title">🟠 Reddit</div>
+      <div class="platform-card" id="card-reddit">
+        <div class="pc-header">
+          <div class="pc-info">
+            <div class="pc-icon">🟠</div>
+            <div><div class="pc-name">Reddit</div><div class="pc-desc">Không cần đăng nhập — public API</div></div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="tog-reddit" checked onchange="togglePlatform('reddit')"><div class="toggle-slider"></div></label>
+        </div>
+        <div class="pc-actions">
+          <button class="sp-btn secondary" onclick="testPlatform('reddit','')">🔌 Kiểm tra kết nối</button>
+        </div>
+        <div class="test-result" id="tr-reddit"></div>
+      </div>
     </div>
-    <input type="password" id="modalApiKey" placeholder="sk-or-v1-..." />
-    <button class="modal-btn" onclick="saveKeyFromModal()">🚀 Bắt đầu sử dụng</button>
+
+    <!-- Twitter -->
+    <div class="sp-section">
+      <div class="sp-title">🐦 Twitter / X</div>
+      <div class="platform-card">
+        <div class="pc-header">
+          <div class="pc-info">
+            <div class="pc-icon">🐦</div>
+            <div><div class="pc-name">Twitter / X</div><div class="pc-desc">Cần cookie để đăng nhập</div></div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="tog-twitter" onchange="togglePlatform('twitter')"><div class="toggle-slider"></div></label>
+        </div>
+        <div class="pc-cookie show" id="ck-twitter">
+          <div class="cookie-hint">📌 Cách lấy cookie: Mở Twitter trên Chrome → F12 → Application → Cookies → twitter.com → Copy giá trị của <code>auth_token</code></div>
+          <input type="password" class="sp-input" id="ci-twitter" placeholder="auth_token=xxxxx; ct0=xxxxx" style="margin-bottom:8px"/>
+          <div class="pc-actions">
+            <button class="sp-btn" onclick="savePlatformCookie('twitter')">💾 Lưu</button>
+            <button class="sp-btn secondary" onclick="testPlatform('twitter', document.getElementById('ci-twitter').value)">🔌 Test</button>
+          </div>
+        </div>
+        <div class="test-result" id="tr-twitter"></div>
+      </div>
+    </div>
+
+    <!-- XiaoHongShu -->
+    <div class="sp-section">
+      <div class="sp-title">🔴 Xiaohongshu (小红书)</div>
+      <div class="platform-card">
+        <div class="pc-header">
+          <div class="pc-info">
+            <div class="pc-icon">🔴</div>
+            <div><div class="pc-name">Xiaohongshu</div><div class="pc-desc">Cần cookie để đăng nhập</div></div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="tog-xhs" onchange="togglePlatform('xhs')"><div class="toggle-slider"></div></label>
+        </div>
+        <div class="pc-cookie show" id="ck-xhs">
+          <div class="cookie-hint">📌 Cách lấy cookie: Mở xiaohongshu.com trên Chrome → F12 → Application → Cookies → Copy toàn bộ cookie string (cần có <code>a1</code> và <code>web_session</code>)</div>
+          <input type="password" class="sp-input" id="ci-xhs" placeholder="a1=xxx; web_session=xxx; ..." style="margin-bottom:8px"/>
+          <div class="pc-actions">
+            <button class="sp-btn" onclick="savePlatformCookie('xhs')">💾 Lưu</button>
+            <button class="sp-btn secondary" onclick="testPlatform('xhs', document.getElementById('ci-xhs').value)">🔌 Test</button>
+          </div>
+        </div>
+        <div class="test-result" id="tr-xhs"></div>
+      </div>
+    </div>
+
+    <!-- Bilibili -->
+    <div class="sp-section">
+      <div class="sp-title">📺 Bilibili (B站)</div>
+      <div class="platform-card">
+        <div class="pc-header">
+          <div class="pc-info">
+            <div class="pc-icon">📺</div>
+            <div><div class="pc-name">Bilibili</div><div class="pc-desc">Public API — cookie tùy chọn</div></div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="tog-bilibili" onchange="togglePlatform('bilibili')"><div class="toggle-slider"></div></label>
+        </div>
+        <div class="pc-cookie show" id="ck-bilibili">
+          <div class="cookie-hint">📌 Cookie tùy chọn (để xem nội dung 18+ hoặc nội dung ẩn). Có thể để trống để dùng public API.</div>
+          <input type="password" class="sp-input" id="ci-bilibili" placeholder="SESSDATA=xxx; bili_jct=xxx (tùy chọn)" style="margin-bottom:8px"/>
+          <div class="pc-actions">
+            <button class="sp-btn" onclick="savePlatformCookie('bilibili')">💾 Lưu</button>
+            <button class="sp-btn secondary" onclick="testPlatform('bilibili', document.getElementById('ci-bilibili').value)">🔌 Test</button>
+          </div>
+        </div>
+        <div class="test-result" id="tr-bilibili"></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
 <script>
-// ═══════════════════════════════════════════════════════
-// CONFIG
-// ═══════════════════════════════════════════════════════
-const OPENROUTER_BASE = 'https://openrouter.ai/api/v1/chat/completions';
-const SITE_URL = 'https://konheodat01-web.github.io/nova-ai/';
-const SITE_NAME = 'Nova AI';
+const API = 'http://localhost:8000';
+let history = [];
+let sessions = JSON.parse(localStorage.getItem('nova_sessions') || '[]');
+let currentSid = null;
+let cfg = {};
 
-// Models that have built-in web search (Perplexity)
-const SEARCH_MODELS = ['perplexity/sonar', 'perplexity/sonar-pro'];
-
-// ═══════════════════════════════════════════════════════
-// STATE
-// ═══════════════════════════════════════════════════════
-let apiKey = '';
-let useSearch = true;
-let isLoading = false;
-let conversationHistory = [];
-let chatSessions = [];
-let currentSessionId = null;
-
-// ═══════════════════════════════════════════════════════
-// INIT
-// ═══════════════════════════════════════════════════════
-window.addEventListener('DOMContentLoaded', () => {
-  apiKey = localStorage.getItem('nova_or_key') || '';
-  chatSessions = JSON.parse(localStorage.getItem('nova_sessions') || '[]');
-
-  if (apiKey) {
-    closeModal();
-    updateStatus(true);
-    document.getElementById('sidebarApiKey').value = apiKey;
-    document.getElementById('sendBtn').disabled = false;
-    renderHistorySidebar();
-  }
-
+// ── INIT ──────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', async () => {
   marked.setOptions({ breaks: true, gfm: true });
-  onModelChange(); // sync search toggle UI
+  await loadConfig();
+  checkServer();
 });
 
-// ═══════════════════════════════════════════════════════
-// MODEL
-// ═══════════════════════════════════════════════════════
-function getModel() {
-  return document.getElementById('modelSelector').value;
+async function loadConfig() {
+  try {
+    const r = await fetch(`${API}/config`);
+    cfg = await r.json();
+    // sync model selector
+    const ms = document.getElementById('modelSel');
+    if (cfg.model) ms.value = cfg.model;
+    // sync settings panel
+    if (cfg.openrouter_key) document.getElementById('orKey').value = cfg.openrouter_key;
+    if (cfg.model) document.getElementById('orModel').value = cfg.model;
+    // sync platform toggles
+    for (const [p, v] of Object.entries(cfg.platforms || {})) {
+      const tog = document.getElementById(`tog-${p}`);
+      if (tog) tog.checked = v.enabled;
+      updateDot(p, v.enabled);
+    }
+  } catch(e) { /* server not ready yet */ }
 }
 
-function isSearchModel(model) {
-  return SEARCH_MODELS.includes(model);
-}
-
-function onModelChange() {
-  const model = getModel();
-  const searchModel = isSearchModel(model);
-  const toggleBtn = document.getElementById('searchToggle');
-  if (searchModel) {
-    useSearch = true;
-    toggleBtn.className = 'search-toggle active';
-    toggleBtn.innerHTML = '🔍 Web Search: <strong id="searchLabel">BẬT (tích hợp)</strong>';
-    toggleBtn.style.pointerEvents = 'none';
-    toggleBtn.title = 'Model này có web search tích hợp sẵn';
-  } else {
-    toggleBtn.style.pointerEvents = 'auto';
-    toggleBtn.title = '';
-    refreshSearchToggle();
+async function checkServer() {
+  try {
+    const r = await fetch(`${API}/health`);
+    if (r.ok) document.getElementById('serverPulse').style.background = 'var(--ok)';
+  } catch {
+    document.getElementById('serverPulse').style.background = 'var(--err)';
+    document.getElementById('serverPulse').style.animation = 'none';
   }
 }
 
-function toggleSearch() {
-  if (isSearchModel(getModel())) return;
-  useSearch = !useSearch;
-  refreshSearchToggle();
-}
+// ── INPUT ─────────────────────────────────────────────────
+function kd(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }
+function ar(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight, 160) + 'px'; }
+function qs(t) { document.getElementById('tinput').value = t; send(); }
 
-function refreshSearchToggle() {
-  const btn = document.getElementById('searchToggle');
-  btn.className = 'search-toggle' + (useSearch ? ' active' : '');
-  btn.innerHTML = `🔍 Web Search: <strong>${useSearch ? 'BẬT' : 'TẮT'}</strong>`;
-}
+// ── SEND ──────────────────────────────────────────────────
+async function send() {
+  const inp = document.getElementById('tinput');
+  const q   = inp.value.trim();
+  if (!q) return;
 
-// ═══════════════════════════════════════════════════════
-// API KEY
-// ═══════════════════════════════════════════════════════
-function saveKeyFromModal() {
-  const key = document.getElementById('modalApiKey').value.trim();
-  if (!key.startsWith('sk-or-v1-')) {
-    showToast('⚠️ Key không hợp lệ. Phải bắt đầu bằng "sk-or-v1-"', 'error');
-    return;
-  }
-  storeKey(key);
-  showToast('✅ Kết nối OpenRouter thành công!', 'success');
-}
-
-function saveKeyFromSidebar() {
-  const key = document.getElementById('sidebarApiKey').value.trim();
-  if (!key.startsWith('sk-or-')) {
-    showToast('⚠️ API Key không hợp lệ', 'error');
-    return;
-  }
-  storeKey(key);
-  showToast('✅ API Key đã được lưu!', 'success');
-}
-
-function storeKey(key) {
-  apiKey = key;
-  localStorage.setItem('nova_or_key', key);
-  document.getElementById('sidebarApiKey').value = key;
-  closeModal();
-  updateStatus(true);
-  document.getElementById('sendBtn').disabled = false;
-}
-
-function updateStatus(connected) {
-  document.getElementById('statusDot').className = 'dot' + (connected ? ' connected' : '');
-  document.getElementById('statusText').textContent = connected ? 'OpenRouter kết nối' : 'Chưa kết nối API';
-  const pulse = document.getElementById('modelPulse');
-  if (pulse) pulse.className = connected ? 'pulse' : 'pulse offline';
-}
-
-function closeModal() {
-  document.getElementById('apiModal').style.display = 'none';
-}
-
-// ═══════════════════════════════════════════════════════
-// INPUT HANDLING
-// ═══════════════════════════════════════════════════════
-function handleKeyDown(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-}
-
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 180) + 'px';
-  document.getElementById('sendBtn').disabled = !el.value.trim() || !apiKey;
-}
-
-function sendSuggestion(text) {
-  document.getElementById('chatInput').value = text;
-  sendMessage();
-}
-
-// ═══════════════════════════════════════════════════════
-// SEND MESSAGE
-// ═══════════════════════════════════════════════════════
-async function sendMessage() {
-  const input = document.getElementById('chatInput');
-  const text = input.value.trim();
-  if (!text || isLoading) return;
-  if (!apiKey) { document.getElementById('apiModal').style.display = 'flex'; return; }
-
-  input.value = '';
-  input.style.height = 'auto';
+  inp.value = ''; inp.style.height = 'auto';
   document.getElementById('sendBtn').disabled = true;
-  isLoading = true;
 
-  document.getElementById('welcomeScreen').style.display = 'none';
-  document.getElementById('messagesContainer').style.display = 'flex';
+  document.getElementById('welcome').style.display = 'none';
+  document.getElementById('msgs').style.display = 'flex';
 
-  if (!currentSessionId) {
-    currentSessionId = Date.now().toString();
-    chatSessions.unshift({ id: currentSessionId, title: text.slice(0, 50), ts: Date.now() });
-    saveSessions();
-    renderHistorySidebar();
+  if (!currentSid) {
+    currentSid = Date.now().toString();
+    sessions.unshift({ id: currentSid, title: q.slice(0, 50), ts: Date.now() });
+    localStorage.setItem('nova_sessions', JSON.stringify(sessions.slice(0, 30)));
+    renderHistory();
   }
 
-  appendMessage('user', text);
-  const thinkingId = 'thinking-' + Date.now();
-  appendThinking(thinkingId);
+  addMsg('user', q);
+  const tid = 'th-' + Date.now();
+  addThinking(tid);
 
-  conversationHistory.push({ role: 'user', content: text });
+  history.push({ role: 'user', content: q });
+
+  const model = document.getElementById('modelSel').value;
 
   try {
-    const { answerText, citations, modelUsed } = await callOpenRouter();
-    document.getElementById(thinkingId)?.remove();
-    appendMessage('ai', answerText, citations, modelUsed);
-    conversationHistory.push({ role: 'assistant', content: answerText });
-  } catch (err) {
-    document.getElementById(thinkingId)?.remove();
-    let errMsg = `❌ Lỗi: ${err.message}`;
-    if (err.message.includes('401')) errMsg = '❌ API Key không hợp lệ hoặc hết hạn. Kiểm tra lại key.';
-    if (err.message.includes('402')) errMsg = '❌ Tài khoản OpenRouter hết credit. Vui lòng nạp thêm.';
-    if (err.message.includes('429')) errMsg = '⚠️ Đang bị rate limit. Vui lòng đợi vài giây rồi thử lại.';
-    appendMessage('ai', errMsg, []);
-    console.error(err);
+    // Update model preference on server
+    await fetch(`${API}/config`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ model }) });
+
+    const res = await fetch(`${API}/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ question: q, history: history.slice(-10) })
+    });
+
+    document.getElementById(tid)?.remove();
+
+    if (!res.ok) {
+      const err = await res.json();
+      addMsg('ai', `❌ ${err.error || 'Lỗi không xác định'}`, [], [], '');
+    } else {
+      const data = await res.json();
+      addMsg('ai', data.answer, data.sources || [], data.platforms_searched || [], data.model_used || '');
+      history.push({ role: 'assistant', content: data.answer });
+    }
+  } catch(e) {
+    document.getElementById(tid)?.remove();
+    addMsg('ai', `❌ Không thể kết nối server local. Hãy đảm bảo server đang chạy (start.bat).\n\nLỗi: ${e.message}`);
   }
 
-  isLoading = false;
   document.getElementById('sendBtn').disabled = false;
-  scrollToBottom();
+  scrollBot();
 }
 
-// ═══════════════════════════════════════════════════════
-// OPENROUTER API CALL
-// ═══════════════════════════════════════════════════════
-async function callOpenRouter() {
-  const model = getModel();
-  const searchModel = isSearchModel(model);
+// ── DOM ────────────────────────────────────────────────────
+function addMsg(role, text, sources = [], platforms = [], modelUsed = '') {
+  const c = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.className = `msg ${role}`;
 
-  const systemPrompt = `Bạn là Nova AI – trợ lý AI thông minh chuyên tìm kiếm và tổng hợp thông tin chính xác.
+  const av = document.createElement('div');
+  av.className = `av ${role}`;
+  av.textContent = role === 'ai' ? '✦' : '👤';
 
-NGUYÊN TẮC:
-1. Trả lời bằng tiếng Việt, rõ ràng, có cấu trúc.
-2. Dùng Markdown để format (heading, bullet points, bold, bảng...).
-3. Nếu có thông tin từ web search, hãy trích dẫn nguồn.
-4. Nếu không chắc chắn, hãy nói rõ.
-5. Ngắn gọn nhưng đầy đủ.`;
+  const mc = document.createElement('div');
+  mc.className = 'mc';
 
-  const messages = [
-    { role: 'system', content: systemPrompt },
-    ...conversationHistory
-  ];
-
-  const body = {
-    model: model,
-    messages: messages,
-    temperature: 0.7,
-    max_tokens: 4096,
-    stream: false,
-  };
-
-  const res = await fetch(OPENROUTER_BASE, {
-    method: 'POST',
-    headers: {
-      'Authorization': `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
-      'HTTP-Referer': SITE_URL,
-      'X-Title': SITE_NAME,
-    },
-    body: JSON.stringify(body)
-  });
-
-  if (!res.ok) {
-    const errData = await res.json().catch(() => ({}));
-    throw new Error(errData.error?.message || `HTTP ${res.status}`);
+  if (role === 'ai' && modelUsed) {
+    const m = document.createElement('div');
+    m.className = 'meta';
+    m.innerHTML = `<span>${modelUsed.split('/').pop()}</span>` + platforms.map(p => `<span class="platform-tag">${p}</span>`).join('');
+    mc.appendChild(m);
   }
 
-  const data = await res.json();
-  const choice = data.choices?.[0];
-  if (!choice) throw new Error('Không nhận được phản hồi từ API');
-
-  const answerText = choice.message?.content || '';
-  const modelUsed = data.model || model;
-
-  // Extract citations — Perplexity returns them in data.citations
-  let citations = [];
-  if (data.citations && Array.isArray(data.citations)) {
-    citations = data.citations.map(url => ({
-      uri: url,
-      title: extractDomain(url)
-    }));
-  }
-
-  return { answerText, citations, modelUsed };
-}
-
-function extractDomain(url) {
-  try { return new URL(url).hostname.replace('www.', ''); }
-  catch { return url; }
-}
-
-// ═══════════════════════════════════════════════════════
-// DOM HELPERS
-// ═══════════════════════════════════════════════════════
-function appendMessage(role, text, citations = [], modelUsed = '') {
-  const container = document.getElementById('messagesContainer');
-  const msg = document.createElement('div');
-  msg.className = `message ${role}`;
-
-  const avatar = document.createElement('div');
-  avatar.className = `avatar ${role}`;
-  avatar.textContent = role === 'ai' ? '✦' : '👤';
-
-  const content = document.createElement('div');
-  content.className = 'message-content';
-
-  if (modelUsed && role === 'ai') {
-    const meta = document.createElement('div');
-    meta.className = 'message-meta';
-    meta.textContent = modelUsed.split('/').pop();
-    content.appendChild(meta);
-  }
-
-  const bubble = document.createElement('div');
-  bubble.className = 'message-bubble';
-
+  const bub = document.createElement('div');
+  bub.className = 'bub';
   if (role === 'ai') {
-    bubble.innerHTML = marked.parse(text);
-    bubble.querySelectorAll('a').forEach(a => { a.target = '_blank'; a.rel = 'noopener noreferrer'; });
+    bub.innerHTML = marked.parse(text);
+    bub.querySelectorAll('a').forEach(a => { a.target = '_blank'; a.rel = 'noopener noreferrer'; });
   } else {
-    bubble.textContent = text;
+    bub.textContent = text;
   }
-  content.appendChild(bubble);
+  mc.appendChild(bub);
 
-  // Citations
-  if (role === 'ai' && citations.length > 0) {
-    const citBlock = document.createElement('div');
-    citBlock.className = 'citations-block';
-    citBlock.innerHTML = `
-      <div class="citations-label">🔗 Nguồn tham khảo (${citations.length})</div>
-      <div class="citation-list">
-        ${citations.map((c, i) => `
-          <div class="citation-item">
-            <div class="citation-num">${i + 1}</div>
-            <a class="citation-link" href="${escapeHtml(c.uri)}" target="_blank" rel="noopener noreferrer">
-              <span>${escapeHtml(c.title)}</span>
-              <span class="citation-domain">${escapeHtml(c.uri)}</span>
-            </a>
-          </div>
-        `).join('')}
-      </div>`;
-    content.appendChild(citBlock);
+  if (role === 'ai' && sources.length > 0) {
+    const sb = document.createElement('div');
+    sb.className = 'sources';
+    sb.innerHTML = `<div class="src-label">🔗 Nguồn tham khảo (${sources.length})</div>
+    <div class="src-list">${sources.map((s, i) => `
+      <div class="src-item">
+        <div class="src-num">${i + 1}</div>
+        <a class="src-link" href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">
+          <span class="src-platform ${s.platform || 'web'}">${s.platform || 'web'}</span>${esc(s.title || s.url)}
+        </a>
+      </div>`).join('')}
+    </div>`;
+    mc.appendChild(sb);
   }
 
-  if (role === 'ai') { msg.appendChild(avatar); msg.appendChild(content); }
-  else { msg.appendChild(content); msg.appendChild(avatar); }
-
-  container.appendChild(msg);
-  scrollToBottom();
+  if (role === 'ai') { d.appendChild(av); d.appendChild(mc); }
+  else { d.appendChild(mc); d.appendChild(av); }
+  c.appendChild(d);
+  scrollBot();
 }
 
-function appendThinking(id) {
-  const container = document.getElementById('messagesContainer');
-  const msg = document.createElement('div');
-  msg.className = 'message ai'; msg.id = id;
-  const avatar = document.createElement('div');
-  avatar.className = 'avatar ai'; avatar.textContent = '✦';
-  const content = document.createElement('div');
-  content.className = 'message-content';
-  const bubble = document.createElement('div');
-  bubble.className = 'message-bubble';
-  const searchModel = isSearchModel(getModel());
-  bubble.innerHTML = searchModel
-    ? `<div class="search-indicator"><div class="search-spinner"></div>Đang tìm kiếm thông tin trên web...</div>`
-    : `<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
-  content.appendChild(bubble);
-  msg.appendChild(avatar); msg.appendChild(content);
-  container.appendChild(msg);
-  scrollToBottom();
+function addThinking(id) {
+  const c = document.getElementById('msgs');
+  const d = document.createElement('div');
+  d.className = 'msg ai'; d.id = id;
+  const av = document.createElement('div');
+  av.className = 'av ai'; av.textContent = '✦';
+  const mc = document.createElement('div');
+  mc.className = 'mc';
+  const bub = document.createElement('div');
+  bub.className = 'bub';
+  bub.innerHTML = `<div class="searching"><div class="spin"></div>Đang thu thập từ MXH và tổng hợp...</div>`;
+  mc.appendChild(bub);
+  d.appendChild(av); d.appendChild(mc);
+  c.appendChild(d);
+  scrollBot();
 }
 
-function scrollToBottom() {
-  const c = document.getElementById('chatArea');
-  setTimeout(() => c.scrollTo({ top: c.scrollHeight, behavior: 'smooth' }), 50);
+function scrollBot() {
+  const ca = document.getElementById('chatArea');
+  setTimeout(() => ca.scrollTo({ top: ca.scrollHeight, behavior: 'smooth' }), 50);
 }
 
-function escapeHtml(str) {
-  if (!str) return '';
-  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function esc(s) {
+  if (!s) return '';
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-// ═══════════════════════════════════════════════════════
-// SESSION MANAGEMENT
-// ═══════════════════════════════════════════════════════
 function newChat() {
-  currentSessionId = null;
-  conversationHistory = [];
-  document.getElementById('messagesContainer').innerHTML = '';
-  document.getElementById('messagesContainer').style.display = 'none';
-  document.getElementById('welcomeScreen').style.display = 'flex';
-  document.querySelectorAll('.history-item').forEach(el => el.classList.remove('active'));
+  currentSid = null; history = [];
+  document.getElementById('msgs').innerHTML = '';
+  document.getElementById('msgs').style.display = 'none';
+  document.getElementById('welcome').style.display = 'flex';
 }
 
-function saveSessions() {
-  localStorage.setItem('nova_sessions', JSON.stringify(chatSessions.slice(0, 30)));
+function renderHistory() {
+  const c = document.getElementById('histList');
+  c.innerHTML = sessions.length
+    ? sessions.map(s => `<div class="hi ${s.id === currentSid ? 'active' : ''}" id="h-${s.id}">💬 ${esc(s.title)}</div>`).join('')
+    : '<div style="padding:10px 8px;font-size:11px;color:var(--tm);text-align:center">Chưa có cuộc trò chuyện</div>';
 }
 
-function renderHistorySidebar() {
-  const container = document.getElementById('chatHistory');
-  if (!chatSessions.length) {
-    container.innerHTML = `<div style="padding:12px 10px;font-size:12px;color:var(--text-muted);text-align:center">Chưa có cuộc trò chuyện nào</div>`;
-    return;
+// ── SETTINGS ──────────────────────────────────────────────
+function openSettings() { document.getElementById('settingsOverlay').classList.add('open'); loadConfig(); }
+function closeSettings() { document.getElementById('settingsOverlay').classList.remove('open'); }
+function overlayClick(e) { if (e.target === document.getElementById('settingsOverlay')) closeSettings(); }
+
+async function saveApiSettings() {
+  const key   = document.getElementById('orKey').value.trim();
+  const model = document.getElementById('orModel').value;
+  await fetch(`${API}/config`, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ openrouter_key: key, model })
+  });
+  document.getElementById('modelSel').value = model;
+  toast('✅ Đã lưu cài đặt API', 'ok');
+}
+
+async function togglePlatform(p) {
+  const enabled = document.getElementById(`tog-${p}`).checked;
+  await fetch(`${API}/config`, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ platforms: { [p]: { enabled } } })
+  });
+  updateDot(p, enabled);
+}
+
+async function savePlatformCookie(p) {
+  const cookie = document.getElementById(`ci-${p}`).value.trim();
+  await fetch(`${API}/config`, {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ platforms: { [p]: { cookie } } })
+  });
+  toast(`✅ Cookie ${p} đã lưu`, 'ok');
+}
+
+async function testPlatform(p, cookie) {
+  const el = document.getElementById(`tr-${p}`);
+  el.style.display = 'block';
+  el.className = 'test-result';
+  el.textContent = '⏳ Đang kiểm tra...';
+  try {
+    const r = await fetch(`${API}/test-platform`, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ platform: p, cookie })
+    });
+    const d = await r.json();
+    el.className = `test-result ${d.ok ? 'ok' : 'fail'}`;
+    el.textContent = d.ok ? `✅ ${d.message}` : `❌ ${d.message}`;
+  } catch(e) {
+    el.className = 'test-result fail';
+    el.textContent = `❌ Lỗi kết nối server: ${e.message}`;
   }
-  container.innerHTML = chatSessions.map(s => `
-    <div class="history-item ${s.id === currentSessionId ? 'active' : ''}" id="hist-${s.id}">
-      💬 ${escapeHtml(s.title)}
-    </div>`).join('');
 }
 
-// ═══════════════════════════════════════════════════════
-// TOAST
-// ═══════════════════════════════════════════════════════
-function showToast(msg, type = '') {
+async function saveModelPref() {
+  const model = document.getElementById('modelSel').value;
+  await fetch(`${API}/config`, { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ model }) });
+}
+
+function updateDot(p, enabled) {
+  const dot = document.getElementById(`dot-${p}`);
+  if (dot) dot.className = `ps-dot ${enabled ? 'on' : ''}`;
+}
+
+function toast(msg, type = '') {
   const t = document.createElement('div');
   t.className = `toast ${type}`; t.textContent = msg;
   document.body.appendChild(t);
-  setTimeout(() => t.remove(), 3500);
+  setTimeout(() => t.remove(), 3000);
 }
 </script>
 </body>
